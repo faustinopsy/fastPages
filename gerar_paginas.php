@@ -163,7 +163,45 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         </html>';
         file_put_contents('public/' . $pagina_nome . '.html', $html);
     }
-    echo '<div class="container"><h3>Páginas geradas com sucesso, na pasta public!</h3>
-    <p><a class="orange-text text-lighten-3" href="public/' . $acesso . '.html">Acessar</a> </p></div>';
+    // echo '<div class="container"><h3>Páginas geradas com sucesso, na pasta public!</h3>
+    // <p><a class="orange-text text-lighten-3" href="public/' . $acesso . '.html">Acessar</a> </p></div>';
+    // Gerar o arquivo ZIP
+    $zip = new ZipArchive();
+    $zipFileName = 'public.zip';
+    function addFolderToZip($dir, $zipArchive, $zipdir = '') {
+      if (is_dir($dir)) {
+          if ($dh = opendir($dir)) {
+              if (!empty($zipdir)) {
+                  $zipArchive->addEmptyDir($zipdir);
+              }
+  
+              while (($file = readdir($dh)) !== false) {
+                  if (!is_file($dir . $file)) {
+                      if (($file !== ".") && ($file !== "..")) {
+                          addFolderToZip($dir . $file . "/", $zipArchive, $zipdir . $file . "/");
+                      }
+                  } else {
+                      $zipArchive->addFile($dir . $file, $zipdir . $file);
+                  }
+              }
+              closedir($dh);
+          }
+      }
+  }
+  
+
+    if ($zip->open($zipFileName, ZipArchive::CREATE | ZipArchive::OVERWRITE) === TRUE) {
+        addFolderToZip('public/', $zip);
+        $zip->close();
+
+        header('Content-Type: application/zip');
+        header('Content-disposition: attachment; filename=' . $zipFileName);
+        header('Content-Length: ' . filesize($zipFileName));
+        readfile($zipFileName);
+
+        unlink($zipFileName);
+    } else {
+        echo 'Falha ao criar o arquivo ZIP.';
+    }
 }
 ?>
