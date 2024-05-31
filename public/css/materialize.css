@@ -3197,11 +3197,13 @@ td, th {
 
 .progress {
   position: relative;
-  height: 4px;
+  height: 14px;
   display: block;
   width: 100%;
   background-color: #acece6;
   border-radius: 2px;
+  border-top: solid 4px #3bff002e;
+  border-bottom: 4px solid #3bff002e;
   margin: 0.5rem 0 1rem 0;
   overflow: hidden;
 }
@@ -3217,7 +3219,7 @@ td, th {
 }
 
 .progress .indeterminate {
-  background-color: #26a69a;
+  background-color: #039be5;
 }
 
 .progress .indeterminate:before {
@@ -3228,7 +3230,7 @@ td, th {
   left: 0;
   bottom: 0;
   will-change: left, right;
-  -webkit-animation: indeterminate 2.1s cubic-bezier(0.65, 0.815, 0.735, 0.395) infinite;
+  -webkit-animation: indeterminate 2.1s cubic-bezier(1.65, 1.815, 1.735, 1.395) infinite;
           animation: indeterminate 2.1s cubic-bezier(0.65, 0.815, 0.735, 0.395) infinite;
 }
 
@@ -3239,8 +3241,8 @@ td, th {
   top: 0;
   left: 0;
   bottom: 0;
-  will-change: left, right;
-  -webkit-animation: indeterminate-short 2.1s cubic-bezier(0.165, 0.84, 0.44, 1) infinite;
+  will-change: right, left;
+  -webkit-animation: indeterminate-short 3.1s cubic-bezier(1.165, 1.84, 1.44, 1) infinite;
           animation: indeterminate-short 2.1s cubic-bezier(0.165, 0.84, 0.44, 1) infinite;
   -webkit-animation-delay: 1.15s;
           animation-delay: 1.15s;
@@ -3278,16 +3280,16 @@ td, th {
 
 @-webkit-keyframes indeterminate-short {
   0% {
-    left: -200%;
-    right: 100%;
+    left: 200%;
+    right: -100%;
   }
   60% {
-    left: 107%;
-    right: -8%;
+    left: -107%;
+    right: 8%;
   }
   100% {
-    left: 107%;
-    right: -8%;
+    left: -107%;
+    right: 8%;
   }
 }
 

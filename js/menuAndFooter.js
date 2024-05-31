@@ -1,6 +1,14 @@
 document.addEventListener("DOMContentLoaded", function() {
-
-let menuHtml=`<nav class="materialize-red lighten-4" role="navigation">
+let menuHtml=`
+<div id="splashScreen" >
+    <div id="loading"><p>Carregando...</p> 
+        <div id="loadingBar">
+            <div id="loadingPercentage" style="width: 0%;">
+        </div>
+        </div>
+    </div>
+</div>
+<nav class="materialize-red lighten-4" role="navigation">
 <div class="nav-wrapper container">
     <a id="logo-container" href="#" class="brand-logo"><i class="material-icons">all_inclusive</i>FastPages</a>
     <ul class="right hide-on-med-and-down"></ul>
@@ -44,3 +52,20 @@ document.getElementById("menu-container").innerHTML = menuHtml;
 document.getElementById("footer-container").innerHTML = footerHtml;
 
 });
+window.addEventListener("load", function () {
+    const loadingPercentage = document.getElementById("loadingPercentage");
+    const splashScreen = document.getElementById("splashScreen");
+    //const conteudo = document.getElementById("conteudo");
+    
+    let percentage = 0;
+    const interval = setInterval(() => {
+      percentage += 5;
+      loadingPercentage.style.width = `${percentage}%`;
+      
+      if (percentage >= 100) {
+        clearInterval(interval);
+        splashScreen.style.display = "none";
+        //conteudo.style.display = "block";
+      }
+    }, 50);
+  });

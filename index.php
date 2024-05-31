@@ -7,15 +7,96 @@
     <link href="public/css/materialize.css" rel="stylesheet">
     <link href="public/css/style.css" type="text/css" rel="stylesheet" media="screen,projection"/>
     <style>
-        .step {
-            display: none;
-        }
-        .step.active {
-            display: block;
-        }
+.step {
+    display: none;
+}
+.step.active {
+    display: block;
+}
+#splashScreen {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #rgba(0, 0, 25, 0.6);
+    backdrop-filter: blur(20px);
+    z-index: 9999;
+  }
+  
+  #loading {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 200px;
+    transform: translate(-50%, -50%);
+    text-align: center;
+  }
+  
+  #loadingBar {
+    width: 80%;
+    height: 20px;
+    margin: 20px auto;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    overflow: hidden;
+  }
+  
+  #loadingPercentage {
+    width: 0%;
+    height: 100%;
+    background-color: yellow;
+    border-top: solid 8px teal;
+    border-bottom: solid 8px blue;
+  }
     </style>
 </head>
 <body>
+<?php
+$results = [];
+function limit_requests($ip, $limit, $time_window) {
+    $requests = file_get_contents('requests.json');
+    $requests = json_decode($requests, true);
+
+    if (!isset($requests[$ip])) {
+        $requests[$ip] = array(time());
+    } else {
+        foreach ($requests[$ip] as $key => $time) {
+            if ($time < time() - $time_window) {
+                unset($requests[$ip][$key]);
+            }
+        }
+        if (count($requests[$ip]) >= $limit) {
+            return false;
+        }
+        $requests[$ip][] = time();
+    }
+    file_put_contents('requests.json', json_encode($requests));
+    return true;
+}
+$user_agent = $_SERVER['HTTP_USER_AGENT'];
+$ip = $_SERVER['REMOTE_ADDR'];
+$dia=3600*24;
+$details = json_decode(file_get_contents("http://ip-api.com/json/{$ip}"));
+if (!limit_requests($ip, 5, $dia)) {
+    $results = "
+    <div id='menu-container'></div>
+    <div id='splashScreen' >
+    <div id='loading'>
+        <p>Você excedeu o limite de solicitações. </p> 
+            <div class='progress'>
+            <div class='indeterminate'></div>
+        </div>
+        <p>Por favor volte, amanhã</p>
+    </div>
+</div>
+<script src='js/menuAndFooter.js'></script>
+<div id='footer-container'></div>
+    ";
+    echo $results;
+   exit; 
+}
+?>
 <div id="menu-container"></div>
 <div class="container">
     <h3>Gerenciador de Páginas</h3>
