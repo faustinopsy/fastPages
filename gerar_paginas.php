@@ -1,61 +1,108 @@
 <?php
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $pagina = $_POST['pagina'];
-    $acesso=0;
+    $uploads_dir = 'uploads/';
+    $acesso = 0;
+   
+    if (!is_dir($uploads_dir)) {
+        mkdir($uploads_dir, 0777, true);
+    }
+
     function gerar_menu($pagina) {
-      $numero=0;
+        $numero = 0;
         $menu = '<nav class="light-blue lighten-1" role="navigation">
                   <div class="nav-wrapper container">
                   <a id="logo-container" href="#" class="brand-logo">Logo</a>
                   <ul class="right hide-on-med-and-down">';
         foreach ($pagina as $pagina_nome => $conteudo_pagina) {
+          if (is_int($pagina_nome)) {
+            continue;
+        }
             $menu .= '<li><a href="' . htmlspecialchars($pagina_nome) . '.html">' . htmlspecialchars($pagina_nome) . '</a></li>';
         }
         $menu .= '</ul><ul id="nav-mobile" class="sidenav">';
         foreach ($pagina as $pagina_nome => $conteudo_pagina) {
-          $numero=$numero+1;
-          
-          $menu .= '<li><a href="' . htmlspecialchars($pagina_nome) . '.html">
-          <i class="material-icons">filter_'.$numero.'</i>' . htmlspecialchars($pagina_nome) . '</a></li>';
-      }
-       $menu .= '</ul>
+          if (is_int($pagina_nome)) {
+            continue;
+        }
+            $numero=$numero+1;
+            $menu .= '<li><a href="' . htmlspecialchars($pagina_nome) . '.html">
+            <i class="material-icons">filter_' . $numero . '</i>' . htmlspecialchars($pagina_nome) . '</a></li>';
+        }
+        $menu .= '</ul>
                   <a href="#" data-target="nav-mobile" class="sidenav-trigger">
                   <i class="material-icons">menu</i>
                   </a>
                   </div>
                   </nav>';
+                  
         return $menu;
     }
 
     $menu = gerar_menu($pagina);
-
     foreach ($pagina as $pagina_nome => $conteudo_pagina) {
-      if($acesso===0){
-        $acesso =  $pagina_nome;
-      }
+        if (is_int($pagina_nome)) {
+          continue;
+        }
+        if ($acesso === 0) {
+            $acesso = $pagina_nome;
+        }
         $html = '<!DOCTYPE html>
         <html lang="pt-BR">
-            <title>' . htmlspecialchars($pagina_nome) . '</title>
-            <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
-            <meta name="viewport" content="width=device-width, initial-scale=1"/>
-            <link href="css/materialize.min.css" rel="stylesheet">
-            <link href="css/style.css" type="text/css" rel="stylesheet" media="screen,projection"/>
-        </head>
+            <head>
+                <title>' . htmlspecialchars($pagina_nome) . '</title>
+                <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+                <meta name="viewport" content="width=device-width, initial-scale=1"/>
+                <link href="css/materialize.min.css" rel="stylesheet">
+                <link href="css/style.css" type="text/css" rel="stylesheet" media="screen,projection"/>
+            </head>
         <body>
             ' . $menu . '
             <div class="container">';
         if (isset($conteudo_pagina['sections'])) {
             $html .= '<div class="row"><br>';
-            foreach ($conteudo_pagina['sections'] as $section) {
+            foreach ($conteudo_pagina['sections'] as $sectionIndex => $section) {
+                $sectionType = $section['type'];
+                $sectionContent = '';
+                if ($sectionType === 'text') {
+                    $sectionContent = '<p>' . htmlspecialchars($section['content']) . '</p>';
+                } elseif ($sectionType === 'image') {
+                    $fileTmpPath = $_FILES['pagina']['tmp_name'][$pagina_nome]['sections'][$sectionIndex]['content'];
+                    $fileName = basename($_FILES['pagina']['name'][$pagina_nome]['sections'][$sectionIndex]['content']);
+                    $filePath = $uploads_dir . $fileName;
+                    if (move_uploaded_file($fileTmpPath, 'public/'.$filePath)) {
+                        $sectionContent = '<img src="' . $filePath . '" alt="' . htmlspecialchars($pagina_nome) . '" style="width: 150px;height: 150px;">';
+                    } else {
+                        $sectionContent = '<p>Erro ao fazer upload da imagem.</p>';
+                    }
+                } elseif ($sectionType === 'form') {
+                    $sectionContent = '
+                        <form>
+                            <div class="input-field">
+                                <input type="text" id="name" name="name" required>
+                                <label for="name">Nome</label>
+                            </div>
+                            <div class="input-field">
+                                <input type="email" id="email" name="email" required>
+                                <label for="email">Email</label>
+                            </div>
+                            <div class="input-field">
+                                <textarea id="message" name="message" class="materialize-textarea" required></textarea>
+                                <label for="message">Mensagem</label>
+                            </div>
+                            <button type="submit" class="btn waves-effect waves-light">Enviar</button>
+                        </form>
+                    ';
+                }
                 $html .= '<div class="section col s12 m6">
                             <div class="card">
-                              <div class="card-content">
-                    <p>' . htmlspecialchars($section) . '</p>
-                    </div>
-                    <div class="card-action">
-                    </div>
-                  </div>
-                  </div>';
+                              <div class="card-content">'
+                    . $sectionContent .
+                    '</div>
+                              <div class="card-action">
+                              </div>
+                            </div>
+                          </div>';
             }
         }
         $html .= '</div>';
@@ -98,8 +145,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         </div>
       </footer>
         </html>';
-        file_put_contents('public/'.$pagina_nome . '.html', $html);
+        file_put_contents('public/' . $pagina_nome . '.html', $html);
     }
     echo '<div class="container"><h3>Páginas geradas com sucesso, na pasta public!</h3>
-    <p><a class="orange-text text-lighten-3" href="public/'.$acesso.'.html">Acessar</a> </p></div>';
+    <p><a class="orange-text text-lighten-3" href="public/' . $acesso . '.html">Acessar</a> </p></div>';
 }
+?>
