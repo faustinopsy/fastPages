@@ -64,11 +64,11 @@ Este gerenciador de páginas pode ser utilizado em diversos nichos devido à sua
 
 1. **Clone o repositório**:
     ```bash
-    git clone https://github.com/faustinopsy/fast-cms.git
+    git clone https://github.com/faustinopsy/fastPages.git
     ```
 2. **Navegue até o diretório do projeto**:
     ```bash
-    cd fast-cms
+    cd fastPages
     ```
 3. **Abra o projeto em seu servidor local (XAMPP, WAMP, etc.)**.
 4. **Acesse o `index.php` pelo navegador e siga os passos do formulário multi-step** para criar suas páginas personalizadas.
